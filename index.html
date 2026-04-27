@@ -89,7 +89,7 @@
                 
                 <div id="apiInfoDisplay" class="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-100 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04kM12 21.355r2.263-1.41a12.02 12.02 0 003.024-3.024L12 21.355z" /></svg>
-                    ພ້ອມໃຊ້ງານ (Auto/Injected)
+                    ພ້ອມໃຊ້ງານ
                 </div>
             </div>
 
@@ -148,9 +148,8 @@
     </div>
 
     <script>
-        // ໝາຍເຫດ: ລະບົບຈະພະຍາຍາມໃຊ້ຄ່າຈາກສະພາບແວດລ້ອມ Canvas ຖ້າປ່ອງນີ້ຫວ່າງ
+        const apiKeyEnv = ""; // Global API Key placeholder
         let customApiKey = localStorage.getItem('user_gemini_key') || ""; 
-        const envApiKey = ""; // This will be handled by the fetch proxy
         
         let sourceHtml = "";
         let translatedHtml = "";
@@ -176,11 +175,10 @@
 
         if (customApiKey) {
             els.apiKeyInput.value = customApiKey;
-            els.apiInfoDisplay.innerText = "ໃຊ້ Key ຈາກ Google AI Studio";
+            els.apiInfoDisplay.innerText = "ໃຊ້ Custom API Key";
             els.apiInfoDisplay.classList.replace('text-green-600', 'text-blue-600');
         }
 
-        // ຈັດການການເປີດ/ປິດ ປ່ອງກອກ Key
         els.toggleApiBtn.onclick = () => {
             if (els.apiInputGroup.classList.contains('hidden')) {
                 els.apiInputGroup.classList.remove('hidden');
@@ -194,11 +192,11 @@
                 els.toggleApiBtn.innerText = "ແກ້ໄຂ";
                 
                 if (customApiKey) {
-                    els.apiInfoDisplay.innerText = "ໃຊ້ Key ຈາກ Google AI Studio";
+                    els.apiInfoDisplay.innerText = "ໃຊ້ Custom API Key";
                     els.apiInfoDisplay.classList.replace('text-green-600', 'text-blue-600');
                     updateApiStatus('active', 'ໃຊ້ Custom Key');
                 } else {
-                    els.apiInfoDisplay.innerText = "ພ້ອມໃຊ້ງານ (Auto-injected)";
+                    els.apiInfoDisplay.innerText = "ພ້ອມໃຊ້ງານ";
                     els.apiInfoDisplay.classList.replace('text-blue-600', 'text-green-600');
                     checkInitialApi();
                 }
@@ -217,8 +215,7 @@
         }
 
         async function checkInitialApi() {
-            // Check if we have a key or if we're in an environment that provides it
-            if (customApiKey || envApiKey || typeof __app_id !== 'undefined') {
+            if (customApiKey || apiKeyEnv || typeof __app_id !== 'undefined') {
                 updateApiStatus('active', 'API ພ້ອມແລ້ວ');
             } else {
                 updateApiStatus('pending', 'ກະລຸນາຕັ້ງຄ່າ API Key');
@@ -228,9 +225,9 @@
         checkInitialApi();
 
         async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
-            const currentKey = customApiKey || envApiKey || "";
-            // If the URL already contains a key placeholder, replace it or append it
-            const finalUrl = url.includes("key=") ? url.replace(/key=[^&]*/, `key=${currentKey}`) : `${url}&key=${currentKey}`;
+            const keyToUse = customApiKey || apiKeyEnv || "";
+            // Ensure the key is appended correctly to the URL for the Google API
+            const finalUrl = `${url}?key=${keyToUse}`;
 
             try {
                 const response = await fetch(finalUrl, options);
@@ -238,21 +235,23 @@
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     const errorCode = response.status;
-                    const errorMsg = errorData.error?.message || "Unknown error";
+                    const errorMsg = errorData.error?.message || "ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່";
 
                     if ([401, 403, 429].includes(errorCode)) {
                         updateApiStatus('error', `Error ${errorCode}`);
-                        if (retries > 0) {
-                            await new Promise(resolve => setTimeout(resolve, backoff));
-                            return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
-                        }
                     }
-                    throw new Error(`${errorCode}: ${errorMsg}`);
+                    
+                    if (retries > 0 && errorCode === 429) {
+                        await new Promise(resolve => setTimeout(resolve, backoff));
+                        return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
+                    }
+                    throw new Error(errorMsg);
                 }
                 updateApiStatus('active', 'ກຳລັງປະມວນຜົນ');
                 return await response.json();
             } catch (err) {
-                if (retries > 0 && !err.message.includes("400")) {
+                if (err.name === 'TypeError' && retries > 0) {
+                    // This often happens due to network issues or CORS failures
                     await new Promise(resolve => setTimeout(resolve, backoff));
                     return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
                 }
@@ -281,6 +280,7 @@
 
         els.translateBtn.onclick = async () => {
             if (!sourceHtml) return showToast("ກະລຸນາເລືອກໄຟລ໌ກ່ອນ");
+            if (!customApiKey && !apiKeyEnv) return showToast("ກະລຸນາຕັ້ງຄ່າ API Key ກ່ອນເລີ່ມການແປ");
 
             els.translateBtn.disabled = true;
             els.translateBtn.innerText = "ກຳລັງແປ...";
@@ -302,6 +302,7 @@
             Keep the output as pure HTML content. 
             ${els.promptExtra.value ? "Additional Instructions: " + els.promptExtra.value : ""}`;
 
+            // Updated base URL without the key (key is added in fetchWithRetry)
             const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
             
             try {
@@ -327,13 +328,13 @@
                 updateApiStatus('active', 'ແປສຳເລັດແລ້ວ');
             } catch (err) {
                 console.error(err);
-                let displayError = err.message;
-                if (err.message.includes("403") || err.message.includes("401")) {
-                    displayError = "API Key ບໍ່ຖືກຕ້ອງ ຫຼື ຍັງບໍ່ທັນໄດ້ເປີດໃຊ້ງານໃນ AI Studio. ກະລຸນາກວດສອບ Key ຂອງທ່ານ.";
-                }
-                showToast("ເກີດຂໍ້ຜິດພາດ: " + displayError);
-                els.translatedPreview.innerHTML = `<div class="text-red-500 italic p-4 border border-red-100 rounded-lg bg-red-50">ບໍ່ສາມາດແປໄດ້: ${displayError}</div>`;
-                updateApiStatus('error', 'ການແປລົ້ມເຫຼວ');
+                showToast("ເກີດຂໍ້ຜິດພາດ: " + err.message);
+                els.translatedPreview.innerHTML = `<div class="text-red-500 italic p-4 border border-red-100 rounded-lg bg-red-50">
+                    <strong>ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່:</strong><br>
+                    ${err.message}<br><br>
+                    <small>ຄຳແນະນຳ: ກວດສອບອິນເຕີເນັດ ຫຼື API Key ຂອງທ່ານໃຫ້ຖືກຕ້ອງ.</small>
+                </div>`;
+                updateApiStatus('error', 'ການເຊື່ອມຕໍ່ລົ້ມເຫຼວ');
             } finally {
                 els.translateBtn.disabled = false;
                 els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
