@@ -154,7 +154,7 @@
     </div>
 
     <script>
-        // ການຈັດການ API Key ແບບອັດຕະໂນມັດສຳລັບສະພາບແວດລ້ອມນີ້
+        // API Key ຈະຖືກຈັດການໂດຍອັດຕະໂນມັດຜ່ານສະພາບແວດລ້ອມ Gemini Preview
         const apiKey = ""; 
 
         let rawOriginalHtml = "";
@@ -195,8 +195,6 @@
         });
 
         async function callGeminiAPI(systemInstruction, userText, retryCount = 0) {
-            // ຖ້າ apiKey ຍັງເປັນຄ່າຫວ່າງ, ລະບົບອັດຕະໂນມັດຈະບໍ່ເຮັດວຽກ. 
-            // ໃນສະພາບແວດລ້ອມນີ້ Key ຈະຖືກສົ່ງຜ່ານ URL parameter ໂດຍລະບົບ Preview.
             const modelName = "gemini-2.5-flash-preview-09-2025";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             
@@ -216,8 +214,13 @@
                     const errJson = await response.json().catch(() => ({}));
                     const msg = errJson.error?.message || response.statusText;
                     
-                    if (response.status === 403) throw new Error("API Key ບໍ່ຖືກຕ້ອງ ຫຼື ບໍ່ໄດ້ຮັບອະນຸຍາດ (403)");
-                    if (response.status === 429) { // Rate limit
+                    // ຈັດການຂໍ້ຜິດພາດ 403 ໂດຍສະເພາະ
+                    if (response.status === 403) {
+                        throw new Error("API Key ບໍ່ໄດ້ຮັບອະນຸຍາດ (403). ກະລຸນາລອງ Refresh Preview ຄືນໃໝ່ ເພື່ອໃຫ້ລະບົບໂຫຼດ Key ເຂົ້າໄປ.");
+                    }
+                    
+                    // ຈັດການ Rate Limit (429) ດ້ວຍ Exponential Backoff
+                    if (response.status === 429) {
                         if (retryCount < 5) {
                             const delay = Math.pow(2, retryCount) * 1000;
                             await new Promise(r => setTimeout(r, delay));
@@ -230,6 +233,7 @@
                 const result = await response.json();
                 return result.candidates[0].content.parts[0].text;
             } catch (error) {
+                // ຖ້າເປັນ error ອື່ນໆທີ່ບໍ່ແມ່ນ 403 ໃຫ້ລອງໃໝ່
                 if (retryCount < 5 && !error.message.includes("403")) {
                     const delay = Math.pow(2, retryCount) * 1000;
                     await new Promise(r => setTimeout(r, delay));
@@ -254,19 +258,20 @@
 
             let sys = `You are a professional translator from ${src} to ${tgt}. 
             Translate the text inside the HTML tags while preserving the HTML structure perfectly. 
-            Do NOT include markdown formatting. Just return the translated HTML.`;
+            Do NOT include markdown formatting. Just return the translated HTML content only.`;
             
             if (customPrompt.value.trim()) sys += `\nSpecial instructions: ${customPrompt.value}`;
 
             try {
                 let translated = await callGeminiAPI(sys, rawOriginalHtml);
+                // ທຳຄວາມສະອາດ Markdown ຫາກ AI ສົ່ງມາ
                 translated = translated.replace(/^```html\n?/i, '').replace(/\n?```$/i, '').trim();
                 finalTranslatedHtml = translated;
                 translatedPreview.innerHTML = finalTranslatedHtml;
                 exportSection.classList.remove('hidden');
             } catch (error) {
                 showError("ການແປລົ້ມເຫຼວ: " + error.message);
-                translatedPreview.innerHTML = "ເກີດຂໍ້ຜິດພາດ.";
+                translatedPreview.innerHTML = `<div class="text-red-500 p-4 border border-red-200 rounded">ເກີດຂໍ້ຜິດພາດ: ${error.message}</div>`;
             } finally {
                 translateBtn.classList.remove('hidden');
                 loadingStatus.classList.add('hidden');
@@ -281,6 +286,7 @@
             a.href = url;
             a.download = `${originalFileName.name}_Translated.doc`;
             a.click();
+            URL.revokeObjectURL(url);
         });
 
         function showError(msg) {
