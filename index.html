@@ -57,7 +57,7 @@
                     <span class="w-2 h-2 rounded-full bg-yellow-400" id="statusDot"></span>
                     <span id="statusText">ກຳລັງກວດສອບ API</span>
                 </div>
-                <span class="text-xs opacity-75">Gemini 2.5 Flash</span>
+                <span class="text-xs opacity-75">Gemini 1.5 Flash</span>
             </div>
         </div>
     </header>
@@ -226,7 +226,6 @@
 
         async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
             const keyToUse = customApiKey || apiKeyEnv || "";
-            // Ensure the key is appended correctly to the URL for the Google API
             const finalUrl = `${url}?key=${keyToUse}`;
 
             try {
@@ -237,7 +236,7 @@
                     const errorCode = response.status;
                     const errorMsg = errorData.error?.message || "ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່";
 
-                    if ([401, 403, 429].includes(errorCode)) {
+                    if ([401, 403, 404, 429].includes(errorCode)) {
                         updateApiStatus('error', `Error ${errorCode}`);
                     }
                     
@@ -251,7 +250,6 @@
                 return await response.json();
             } catch (err) {
                 if (err.name === 'TypeError' && retries > 0) {
-                    // This often happens due to network issues or CORS failures
                     await new Promise(resolve => setTimeout(resolve, backoff));
                     return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
                 }
@@ -302,8 +300,8 @@
             Keep the output as pure HTML content. 
             ${els.promptExtra.value ? "Additional Instructions: " + els.promptExtra.value : ""}`;
 
-            // Updated base URL without the key (key is added in fetchWithRetry)
-            const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent`;
+            // Updated to a more stable model name: gemini-1.5-flash
+            const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
             
             try {
                 const data = await fetchWithRetry(baseUrl, {
@@ -320,6 +318,7 @@
                 }
 
                 let resultText = data.candidates[0].content.parts[0].text;
+                // Clean up any potential markdown block indicators
                 resultText = resultText.replace(/```html/gi, '').replace(/```/g, '').trim();
                 
                 translatedHtml = resultText;
@@ -332,7 +331,7 @@
                 els.translatedPreview.innerHTML = `<div class="text-red-500 italic p-4 border border-red-100 rounded-lg bg-red-50">
                     <strong>ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່:</strong><br>
                     ${err.message}<br><br>
-                    <small>ຄຳແນະນຳ: ກວດສອບອິນເຕີເນັດ ຫຼື API Key ຂອງທ່ານໃຫ້ຖືກຕ້ອງ.</small>
+                    <small>ຄຳແນະນຳ: ປ່ຽນໄປໃຊ້ Model gemini-1.5-flash ເພື່ອຄວາມສະຖຽນ.</small>
                 </div>`;
                 updateApiStatus('error', 'ການເຊື່ອມຕໍ່ລົ້ມເຫຼວ');
             } finally {
