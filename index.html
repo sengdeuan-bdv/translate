@@ -114,7 +114,8 @@
     </div>
 
     <script>
-        const apiKey = ""; // ລະບົບຈະຈັດການ Key ອັດຕະໂນມັດ
+        // ໝາຍເຫດ: apiKey ຈະຖືກແທນທີ່ດ້ວຍຄ່າຕົວຈິງຈາກສະພາບແວດລ້ອມ Canvas ໂດຍອັດຕະໂນມັດ
+        const apiKey = ""; 
         let sourceHtml = "";
         let translatedHtml = "";
 
@@ -131,25 +132,35 @@
             errorMsg: document.getElementById('errorMsg')
         };
 
-        // ຟັງຊັນສຳລັບການລອງໃໝ່ເມື່ອເກີດ Error ດ້ວຍ Exponential Backoff
+        // ຟັງຊັນສຳລັບການລອງໃໝ່ເມື່ອເກີດ Error ດ້ວຍ Exponential Backoff ທີ່ແຂງແຮງຂຶ້ນ
         async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
+            // ກວດສອບກ່ອນວ່າ API Key ມີຄ່າຫຼືບໍ່ (ເພື່ອປ້ອງກັນ "unregistered callers")
+            const currentKey = apiKey || "";
+            const finalUrl = url.includes("key=") ? url : `${url}&key=${currentKey}`;
+
             try {
-                const response = await fetch(url, options);
+                const response = await fetch(finalUrl, options);
+                
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
-                    if (response.status === 403 || response.status === 429) {
+                    const errorCode = response.status;
+                    const errorMsg = errorData.error?.message || "Unknown error";
+
+                    // ຖ້າເປັນ 403 (Forbidden) ຫຼື 401 (Unauthorized) ຫຼື 429 (Rate Limit)
+                    if ([401, 403, 429].includes(errorCode)) {
                         if (retries > 0) {
+                            console.log(`Retrying due to ${errorCode}... ${retries} attempts left.`);
                             await new Promise(resolve => setTimeout(resolve, backoff));
-                            return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                            return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
                         }
                     }
-                    throw new Error(errorData.error?.message || `HTTP Error ${response.status}`);
+                    throw new Error(`${errorCode}: ${errorMsg}`);
                 }
                 return await response.json();
             } catch (err) {
-                if (retries > 0) {
+                if (retries > 0 && !err.message.includes("400")) {
                     await new Promise(resolve => setTimeout(resolve, backoff));
-                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
+                    return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
                 }
                 throw err;
             }
@@ -161,11 +172,15 @@
 
             const reader = new FileReader();
             reader.onload = async (event) => {
-                const arrayBuffer = event.target.result;
-                const result = await mammoth.convertToHtml({ arrayBuffer });
-                sourceHtml = result.value;
-                els.originalPreview.innerHTML = sourceHtml;
-                els.originalPreview.classList.remove('text-center', 'items-center', 'italic');
+                try {
+                    const arrayBuffer = event.target.result;
+                    const result = await mammoth.convertToHtml({ arrayBuffer });
+                    sourceHtml = result.value;
+                    els.originalPreview.innerHTML = sourceHtml;
+                    els.originalPreview.classList.remove('text-center', 'items-center', 'italic');
+                } catch (err) {
+                    showToast("ບໍ່ສາມາດອ່ານໄຟລ໌ Word ໄດ້: " + err.message);
+                }
             };
             reader.readAsArrayBuffer(file);
         };
@@ -175,7 +190,13 @@
 
             els.translateBtn.disabled = true;
             els.translateBtn.innerText = "ກຳລັງແປ...";
-            els.translatedPreview.innerHTML = `<div class="space-y-4"><div class="h-4 bg-gray-200 rounded w-3/4 loading-shimmer"></div><div class="h-4 bg-gray-200 rounded w-1/2 loading-shimmer"></div><div class="h-4 bg-gray-200 rounded w-5/6 loading-shimmer"></div></div>`;
+            els.translatedPreview.innerHTML = `
+                <div class="space-y-4">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 loading-shimmer"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/2 loading-shimmer"></div>
+                    <div class="h-4 bg-gray-200 rounded w-5/6 loading-shimmer"></div>
+                    <p class="text-xs text-indigo-500 animate-pulse text-center">AI ກຳລັງວິເຄາະ ແລະ ແປເນື້ອຫາ...</p>
+                </div>`;
 
             const direction = els.langDirection.value;
             const srcLang = direction === 'lo2en' ? 'Lao' : 'English';
@@ -184,6 +205,7 @@
             const systemPrompt = `You are a professional ${srcLang} to ${tgtLang} translator. 
             Translate the HTML content provided. Keep all HTML tags intact. 
             Only translate the text nodes. Do not add any explanation or markdown code blocks. 
+            Keep the output as pure HTML content.
             ${els.promptExtra.value ? "Additional Instructions: " + els.promptExtra.value : ""}`;
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
@@ -198,16 +220,25 @@
                     })
                 });
 
+                if (!data.candidates || data.candidates.length === 0) {
+                    throw new Error("AI ບໍ່ສາມາດສ້າງຄຳຕອບໄດ້ໃນຂະນະນີ້.");
+                }
+
                 let resultText = data.candidates[0].content.parts[0].text;
-                // Clean up any AI-added markdown wrapper
+                // ທຳຄວາມສະອາດຫາກ AI ສົ່ງ Markdown code blocks ມາ
                 resultText = resultText.replace(/```html/gi, '').replace(/```/g, '').trim();
                 
                 translatedHtml = resultText;
                 els.translatedPreview.innerHTML = translatedHtml;
                 els.downloadArea.classList.remove('hidden');
             } catch (err) {
-                showToast("ເກີດຂໍ້ຜິດພາດ: " + err.message);
-                els.translatedPreview.innerHTML = `<div class="text-red-500 italic">ບໍ່ສາມາດແປໄດ້ເນື່ອງຈາກຂໍ້ຜິດພາດທາງເຕັກນິກ. ກະລຸນາລອງໃໝ່ອີກຄັ້ງ.</div>`;
+                console.error(err);
+                let displayError = err.message;
+                if (err.message.includes("403") || err.message.includes("401")) {
+                    displayError = "API Key ບໍ່ຖືກຕ້ອງ ຫຼື ຍັງບໍ່ທັນຖືກເປີດໃຊ້ງານ. ກະລຸນາລອງ Refresh ຫນ້າເວັບຄືນໃໝ່.";
+                }
+                showToast("ເກີດຂໍ້ຜິດພາດ: " + displayError);
+                els.translatedPreview.innerHTML = `<div class="text-red-500 italic p-4 border border-red-100 rounded-lg bg-red-50">ບໍ່ສາມາດແປໄດ້: ${displayError}</div>`;
             } finally {
                 els.translateBtn.disabled = false;
                 els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
@@ -215,13 +246,13 @@
         };
 
         els.downloadBtn.onclick = () => {
-            const blob = new Blob(['\ufeff', `<html><head><meta charset="utf-8"></head><body>${translatedHtml}</body></html>`], {
+            const blob = new Blob(['\ufeff', `<html><head><meta charset="utf-8"><style>body{font-family:'Noto Sans Lao', sans-serif;}</style></head><body>${translatedHtml}</body></html>`], {
                 type: 'application/msword'
             });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `translated_document_${new Date().getTime()}.doc`;
+            a.download = `translated_${new Date().getTime()}.doc`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -232,7 +263,7 @@
             els.errorToast.classList.remove('translate-y-20');
             setTimeout(() => {
                 els.errorToast.classList.add('translate-y-20');
-            }, 5000);
+            }, 6000);
         }
     </script>
 </body>
