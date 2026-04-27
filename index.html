@@ -57,7 +57,7 @@
                     <span class="w-2 h-2 rounded-full bg-yellow-400" id="statusDot"></span>
                     <span id="statusText">ກຳລັງກວດສອບ API</span>
                 </div>
-                <span class="text-xs opacity-75">Multi-Model Support</span>
+                <span class="text-xs opacity-75">Optimized for Gemini 1.5 Flash</span>
             </div>
         </div>
     </header>
@@ -223,26 +223,26 @@
             const target = direction === 'lo2en' ? 'English' : 'Lao';
             const systemPrompt = `Translate this HTML to ${target}. Keep all HTML structure exactly the same. Only translate text inside tags. No preamble, no markdown code blocks. Result must be pure HTML. ${els.promptExtra.value}`;
 
-            // List of model endpoints and versions to try for maximum compatibility
-            const endpoints = [
+            // Try the most compatible endpoints first
+            const configurations = [
                 { version: 'v1beta', model: 'gemini-1.5-flash' },
-                { version: 'v1', model: 'gemini-pro' },
-                { version: 'v1beta', model: 'gemini-1.5-flash-8b' }
+                { version: 'v1', model: 'gemini-1.5-flash' },
+                { version: 'v1beta', model: 'gemini-pro' }
             ];
 
             let lastError = "";
 
-            for (const ep of endpoints) {
+            for (const config of configurations) {
                 try {
-                    const url = `https://generativelanguage.googleapis.com/${ep.version}/models/${ep.model}:generateContent?key=${key}`;
+                    const url = `https://generativelanguage.googleapis.com/${config.version}/models/${config.model}:generateContent?key=${key}`;
                     const response = await fetch(url, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            contents: [{ parts: [{ text: sourceHtml }] }],
-                            // Note: Some older models might not support systemInstruction, so we move it to the prompt if needed
-                            // For v1beta/1.5-flash it works as below:
-                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                            contents: [{ 
+                                parts: [{ text: `INSTRUCTION: ${systemPrompt}\n\nCONTENT TO TRANSLATE:\n${sourceHtml}` }] 
+                            }]
+                            // Note: Moved systemInstruction into prompt for wider compatibility across versions
                         })
                     });
 
@@ -250,23 +250,25 @@
                     if (!response.ok) throw new Error(data.error?.message || "Error");
 
                     let result = data.candidates[0].content.parts[0].text;
+                    // Clean up potential markdown wrappers
                     translatedHtml = result.replace(/```html|```/gi, '').trim();
+                    
                     els.translatedPreview.innerHTML = translatedHtml;
                     els.translatedPreview.classList.remove('italic', 'text-gray-400', 'items-center', 'justify-center');
                     els.downloadArea.classList.remove('hidden');
                     els.translateBtn.disabled = false;
                     els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
-                    return; // Stop after first success
+                    return; 
                 } catch (err) {
                     lastError = err.message;
-                    console.log(`Endpoint ${ep.model} (${ep.version}) failed: ${err.message}`);
+                    console.log(`Failed with ${config.model} (${config.version}): ${err.message}`);
                 }
             }
 
             showToast("ແປບໍ່ໄດ້: " + lastError);
             els.translatedPreview.innerHTML = `<div class="text-red-500 p-4 border border-red-200 rounded-lg bg-red-50">
                 <strong>ຂໍ້ຜິດພາດ:</strong> ${lastError}<br><br>
-                <p class="text-xs">ຄຳແນະນຳ: ໃຫ້ແນ່ໃຈວ່າ API Key ຂອງທ່ານມາຈາກ <a href="https://aistudio.google.com/" target="_blank" class="underline">Google AI Studio</a> ແລະ ມີສະຖານະ Active.</p>
+                <p class="text-xs">ຄຳແນະນຳ: ກະລຸນາກວດສອບວ່າ API Key ຂອງທ່ານມີສະຖານະ Active ໃນ <a href="https://aistudio.google.com/" target="_blank" class="underline">Google AI Studio</a>.</p>
             </div>`;
             els.translateBtn.disabled = false;
             els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
