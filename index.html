@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ລະບົບແປເອກະສານ Word ລາວ ⇄ ອັງກິດ</title>
     
-    <!-- ເພີ່ມ Font Noto Sans Lao ຈາກ Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -23,275 +23,216 @@
             }
         }
     </script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
     <style>
         .doc-preview {
             background: white;
             color: black;
-            font-family: 'Noto Sans Lao', 'Times New Roman', Times, serif;
+            font-family: 'Noto Sans Lao', sans-serif;
             line-height: 1.6;
-            overflow-x: auto;
         }
-        .doc-preview h1 { font-size: 1.8em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; }
-        .doc-preview h2 { font-size: 1.5em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; }
-        .doc-preview h3 { font-size: 1.2em; font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; }
-        .doc-preview h4 { font-size: 1.1em; font-weight: bold; color: #2563eb; margin-top: 1em; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;}
-        .doc-preview p { margin-bottom: 1em; }
-        .doc-preview table { width: 100%; border-collapse: collapse; margin-bottom: 1.5em; white-space: nowrap; }
-        .doc-preview th, .doc-preview td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
-        .doc-preview th { background-color: #f8fafc; font-weight: bold; }
-        .doc-preview ul { list-style-type: disc; margin-left: 20px; margin-bottom: 1em; }
-        .doc-preview ol { list-style-type: decimal; margin-left: 20px; margin-bottom: 1em; }
-        
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .doc-preview table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        .doc-preview th, .doc-preview td { border: 1px solid #ddd; padding: 8px; }
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 font-sans">
+<body class="bg-gray-50 min-h-screen font-sans">
 
-    <header class="bg-blue-700 text-white shadow-md py-4 px-6 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
-                <h1 class="text-2xl font-bold">ເຄື່ອງມືແປເອກະສານ Word ລາວ <span class="mx-1">⇄</span> ອັງກິດ</h1>
-            </div>
-            <div class="text-sm font-medium bg-blue-800 px-3 py-1 rounded-full border border-blue-600">
-                ຂັບເຄື່ອນໂດຍ Gemini 2.5
-            </div>
+    <header class="bg-indigo-700 text-white p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+                AI Document Translator
+            </h1>
+            <span class="text-xs bg-indigo-800 px-2 py-1 rounded">Gemini 2.5 Flash</span>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <div class="lg:col-span-4 space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-semibold flex items-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-blue-600"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
-                    1. ອັບໂຫຼດເອກະສານ (Word)
-                </h2>
-                <div class="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition-colors cursor-pointer" onclick="document.getElementById('fileInput').click()">
-                    <div class="flex justify-center space-x-2 mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-500"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-                    </div>
-                    <p class="text-sm text-slate-600">ຄລິກເພື່ອເລືອກໄຟລ໌ Word</p>
-                    <input type="file" id="fileInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="hidden">
-                </div>
-                <div id="fileInfo" class="mt-3 text-sm text-green-600 font-medium hidden flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
-                    <span id="fileName">ເລືອກໄຟລ໌ແລ້ວ</span>
-                </div>
+    <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Sidebar Controls -->
+        <div class="lg:col-span-4 space-y-4">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">1. ເລືອກໄຟລ໌ Word (.docx)</label>
+                <input type="file" id="fileInput" accept=".docx" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"/>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-semibold flex items-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-blue-600"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>
-                    2. ເລືອກທິດທາງການແປ
-                </h2>
-                <div class="flex space-x-4">
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="langDirection" value="lo2en" class="text-blue-600" checked>
-                        <span class="text-sm font-medium">ລາວ → ອັງກິດ</span>
-                    </label>
-                    <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="radio" name="langDirection" value="en2lo" class="text-blue-600">
-                        <span class="text-sm font-medium">ອັງກິດ → ລາວ</span>
-                    </label>
-                </div>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">2. ທິດທາງການແປ</label>
+                <select id="langDirection" class="w-full p-2 border border-gray-300 rounded-lg text-sm bg-white">
+                    <option value="lo2en">ລາວ ➔ ອັງກິດ (Lao to English)</option>
+                    <option value="en2lo">ອັງກິດ ➔ ລາວ (English to Lao)</option>
+                </select>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-semibold flex items-center mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-2 text-blue-600"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                    3. ຄຳແນະນຳພິເສດ (Prompt)
-                </h2>
-                <textarea id="customPrompt" rows="4" class="w-full p-3 border border-slate-300 rounded-lg text-sm" placeholder="ຕົວຢ່າງ: ແປເປັນທາງການ, RDQA = Routine Data Quality Assessment..."></textarea>
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">3. ຄຳແນະນຳເພີ່ມເຕີມ (Option)</label>
+                <textarea id="promptExtra" rows="3" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="ຕົວຢ່າງ: ແປແບບເປັນທາງການ, ໃຊ້ຄຳສັບທາງການແພດ..."></textarea>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <button id="translateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center">
-                    ເລີ່ມຕົ້ນການແປພາສາ
-                </button>
-                <div id="loadingStatus" class="mt-4 text-sm text-slate-600 hidden text-center">
-                    <div class="animate-spin h-5 w-5 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-2"></div>
-                    ກຳລັງແປພາສາ...
-                </div>
-            </div>
+            <button id="translateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-md disabled:bg-gray-400">
+                ເລີ່ມຕົ້ນການແປ
+            </button>
 
-            <div id="exportSection" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hidden border-l-4 border-l-green-500">
-                <button id="exportBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center">
-                    ດາວໂຫຼດເອກະສານ (.doc)
+            <div id="downloadArea" class="hidden">
+                <button id="downloadBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                    ດາວໂຫຼດໄຟລ໌ (.doc)
                 </button>
             </div>
         </div>
 
-        <div class="lg:col-span-8 flex flex-col space-y-4">
-            <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[400px]">
-                <div class="bg-slate-100 px-4 py-2 border-b font-semibold text-slate-700">ຕົ້ນສະບັບ</div>
-                <div id="originalPreview" class="p-6 overflow-y-auto flex-1 doc-preview text-sm"></div>
+        <!-- Preview Area -->
+        <div class="lg:col-span-8 space-y-4">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 uppercase border-b">ຕົ້ນສະບັບ</div>
+                <div id="originalPreview" class="p-6 h-[300px] overflow-y-auto doc-preview text-sm text-gray-400 italic text-center flex items-center justify-center">
+                    ຍັງບໍ່ມີການອັບໂຫຼດໄຟລ໌
+                </div>
             </div>
 
-            <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-[400px]">
-                <div class="bg-blue-50 px-4 py-2 border-b border-blue-100 font-semibold text-blue-800">ຜົນການແປ</div>
-                <div id="translatedPreview" class="p-6 overflow-y-auto flex-1 doc-preview text-sm"></div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-600 uppercase border-b">ຜົນການແປ</div>
+                <div id="translatedPreview" class="p-6 h-[400px] overflow-y-auto doc-preview text-sm">
+                    <div class="text-gray-400 italic text-center h-full flex items-center justify-center">ຜົນການແປຈະສະແດງຢູ່ບ່ອນນີ້</div>
+                </div>
             </div>
         </div>
     </main>
 
-    <footer class="mt-12 text-center text-sm text-slate-500 pb-8">
-        <p>ພັດທະນາໂດຍ: <span class="font-semibold text-blue-600">Sengdeuan Boutdavong</span></p>
-    </footer>
-
-    <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full mx-4">
-            <h3 class="text-lg font-bold text-center mb-2 text-red-600">ເກີດຂໍ້ຜິດພາດ</h3>
-            <p id="errorMessage" class="text-sm text-slate-600 text-center mb-6"></p>
-            <button onclick="document.getElementById('errorModal').classList.add('hidden')" class="w-full bg-slate-200 py-2 rounded-lg">ປິດ</button>
-        </div>
+    <!-- Error Toast -->
+    <div id="errorToast" class="fixed bottom-5 right-5 bg-red-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-y-20 transition-transform duration-300 flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <span id="errorMsg"></span>
     </div>
 
     <script>
-        // API Key ຈະຖືກຈັດການໂດຍອັດຕະໂນມັດຜ່ານສະພາບແວດລ້ອມ Gemini Preview
-        const apiKey = ""; 
+        const apiKey = ""; // ລະບົບຈະຈັດການ Key ອັດຕະໂນມັດ
+        let sourceHtml = "";
+        let translatedHtml = "";
 
-        let rawOriginalHtml = "";
-        let finalTranslatedHtml = "";
-        const originalFileName = { name: "document" };
+        const els = {
+            fileInput: document.getElementById('fileInput'),
+            translateBtn: document.getElementById('translateBtn'),
+            originalPreview: document.getElementById('originalPreview'),
+            translatedPreview: document.getElementById('translatedPreview'),
+            downloadArea: document.getElementById('downloadArea'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            langDirection: document.getElementById('langDirection'),
+            promptExtra: document.getElementById('promptExtra'),
+            errorToast: document.getElementById('errorToast'),
+            errorMsg: document.getElementById('errorMsg')
+        };
 
-        const fileInput = document.getElementById('fileInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const fileNameDisplay = document.getElementById('fileName');
-        const translateBtn = document.getElementById('translateBtn');
-        const originalPreview = document.getElementById('originalPreview');
-        const translatedPreview = document.getElementById('translatedPreview');
-        const loadingStatus = document.getElementById('loadingStatus');
-        const customPrompt = document.getElementById('customPrompt');
-        const exportSection = document.getElementById('exportSection');
-        const exportBtn = document.getElementById('exportBtn');
-        const errorModal = document.getElementById('errorModal');
-        const errorMessage = document.getElementById('errorMessage');
-        const langDirectionElements = document.getElementsByName('langDirection');
-
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            originalFileName.name = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            fileNameDisplay.textContent = file.name;
-            fileInfo.classList.remove('hidden');
-            
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                mammoth.convertToHtml({arrayBuffer: event.target.result})
-                    .then(result => {
-                        rawOriginalHtml = result.value;
-                        originalPreview.innerHTML = rawOriginalHtml;
-                    })
-                    .catch(err => showError("ບໍ່ສາມາດອ່ານໄຟລ໌ໄດ້: " + err.message));
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        async function callGeminiAPI(systemInstruction, userText, retryCount = 0) {
-            const modelName = "gemini-2.5-flash-preview-09-2025";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{ parts: [{ text: userText }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] }
-            };
-
+        // ຟັງຊັນສຳລັບການລອງໃໝ່ເມື່ອເກີດ Error ດ້ວຍ Exponential Backoff
+        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
             try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
+                const response = await fetch(url, options);
                 if (!response.ok) {
-                    const errJson = await response.json().catch(() => ({}));
-                    const msg = errJson.error?.message || response.statusText;
-                    
-                    // ຈັດການຂໍ້ຜິດພາດ 403 ໂດຍສະເພາະ
-                    if (response.status === 403) {
-                        throw new Error("API Key ບໍ່ໄດ້ຮັບອະນຸຍາດ (403). ກະລຸນາລອງ Refresh Preview ຄືນໃໝ່ ເພື່ອໃຫ້ລະບົບໂຫຼດ Key ເຂົ້າໄປ.");
-                    }
-                    
-                    // ຈັດການ Rate Limit (429) ດ້ວຍ Exponential Backoff
-                    if (response.status === 429) {
-                        if (retryCount < 5) {
-                            const delay = Math.pow(2, retryCount) * 1000;
-                            await new Promise(r => setTimeout(r, delay));
-                            return callGeminiAPI(systemInstruction, userText, retryCount + 1);
+                    const errorData = await response.json().catch(() => ({}));
+                    if (response.status === 403 || response.status === 429) {
+                        if (retries > 0) {
+                            await new Promise(resolve => setTimeout(resolve, backoff));
+                            return fetchWithRetry(url, options, retries - 1, backoff * 2);
                         }
                     }
-                    throw new Error(msg);
+                    throw new Error(errorData.error?.message || `HTTP Error ${response.status}`);
                 }
-
-                const result = await response.json();
-                return result.candidates[0].content.parts[0].text;
-            } catch (error) {
-                // ຖ້າເປັນ error ອື່ນໆທີ່ບໍ່ແມ່ນ 403 ໃຫ້ລອງໃໝ່
-                if (retryCount < 5 && !error.message.includes("403")) {
-                    const delay = Math.pow(2, retryCount) * 1000;
-                    await new Promise(r => setTimeout(r, delay));
-                    return callGeminiAPI(systemInstruction, userText, retryCount + 1);
+                return await response.json();
+            } catch (err) {
+                if (retries > 0) {
+                    await new Promise(resolve => setTimeout(resolve, backoff));
+                    return fetchWithRetry(url, options, retries - 1, backoff * 2);
                 }
-                throw error;
+                throw err;
             }
         }
 
-        translateBtn.addEventListener('click', async function() {
-            if (!rawOriginalHtml) return showError("ກະລຸນາອັບໂຫຼດໄຟລ໌ກ່ອນ");
+        els.fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-            translateBtn.classList.add('hidden');
-            loadingStatus.classList.remove('hidden');
-            translatedPreview.innerHTML = "ກຳລັງປະມວນຜົນ...";
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const arrayBuffer = event.target.result;
+                const result = await mammoth.convertToHtml({ arrayBuffer });
+                sourceHtml = result.value;
+                els.originalPreview.innerHTML = sourceHtml;
+                els.originalPreview.classList.remove('text-center', 'items-center', 'italic');
+            };
+            reader.readAsArrayBuffer(file);
+        };
 
-            let selectedDirection = 'lo2en';
-            for (const rb of langDirectionElements) if (rb.checked) selectedDirection = rb.value;
+        els.translateBtn.onclick = async () => {
+            if (!sourceHtml) return showToast("ກະລຸນາເລືອກໄຟລ໌ກ່ອນ");
+
+            els.translateBtn.disabled = true;
+            els.translateBtn.innerText = "ກຳລັງແປ...";
+            els.translatedPreview.innerHTML = `<div class="space-y-4"><div class="h-4 bg-gray-200 rounded w-3/4 loading-shimmer"></div><div class="h-4 bg-gray-200 rounded w-1/2 loading-shimmer"></div><div class="h-4 bg-gray-200 rounded w-5/6 loading-shimmer"></div></div>`;
+
+            const direction = els.langDirection.value;
+            const srcLang = direction === 'lo2en' ? 'Lao' : 'English';
+            const tgtLang = direction === 'lo2en' ? 'English' : 'Lao';
             
-            let src = selectedDirection === 'lo2en' ? 'Lao' : 'English';
-            let tgt = selectedDirection === 'lo2en' ? 'English' : 'Lao';
+            const systemPrompt = `You are a professional ${srcLang} to ${tgtLang} translator. 
+            Translate the HTML content provided. Keep all HTML tags intact. 
+            Only translate the text nodes. Do not add any explanation or markdown code blocks. 
+            ${els.promptExtra.value ? "Additional Instructions: " + els.promptExtra.value : ""}`;
 
-            let sys = `You are a professional translator from ${src} to ${tgt}. 
-            Translate the text inside the HTML tags while preserving the HTML structure perfectly. 
-            Do NOT include markdown formatting. Just return the translated HTML content only.`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
-            if (customPrompt.value.trim()) sys += `\nSpecial instructions: ${customPrompt.value}`;
-
             try {
-                let translated = await callGeminiAPI(sys, rawOriginalHtml);
-                // ທຳຄວາມສະອາດ Markdown ຫາກ AI ສົ່ງມາ
-                translated = translated.replace(/^```html\n?/i, '').replace(/\n?```$/i, '').trim();
-                finalTranslatedHtml = translated;
-                translatedPreview.innerHTML = finalTranslatedHtml;
-                exportSection.classList.remove('hidden');
-            } catch (error) {
-                showError("ການແປລົ້ມເຫຼວ: " + error.message);
-                translatedPreview.innerHTML = `<div class="text-red-500 p-4 border border-red-200 rounded">ເກີດຂໍ້ຜິດພາດ: ${error.message}</div>`;
-            } finally {
-                translateBtn.classList.remove('hidden');
-                loadingStatus.classList.add('hidden');
-            }
-        });
+                const data = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: sourceHtml }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
 
-        exportBtn.addEventListener('click', function() {
-            const content = `<html><head><meta charset='utf-8'></head><body>${finalTranslatedHtml}</body></html>`;
-            const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+                let resultText = data.candidates[0].content.parts[0].text;
+                // Clean up any AI-added markdown wrapper
+                resultText = resultText.replace(/```html/gi, '').replace(/```/g, '').trim();
+                
+                translatedHtml = resultText;
+                els.translatedPreview.innerHTML = translatedHtml;
+                els.downloadArea.classList.remove('hidden');
+            } catch (err) {
+                showToast("ເກີດຂໍ້ຜິດພາດ: " + err.message);
+                els.translatedPreview.innerHTML = `<div class="text-red-500 italic">ບໍ່ສາມາດແປໄດ້ເນື່ອງຈາກຂໍ້ຜິດພາດທາງເຕັກນິກ. ກະລຸນາລອງໃໝ່ອີກຄັ້ງ.</div>`;
+            } finally {
+                els.translateBtn.disabled = false;
+                els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
+            }
+        };
+
+        els.downloadBtn.onclick = () => {
+            const blob = new Blob(['\ufeff', `<html><head><meta charset="utf-8"></head><body>${translatedHtml}</body></html>`], {
+                type: 'application/msword'
+            });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${originalFileName.name}_Translated.doc`;
+            a.download = `translated_document_${new Date().getTime()}.doc`;
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(url);
-        });
+            document.body.removeChild(a);
+        };
 
-        function showError(msg) {
-            errorMessage.innerText = msg;
-            errorModal.classList.remove('hidden');
+        function showToast(msg) {
+            els.errorMsg.innerText = msg;
+            els.errorToast.classList.remove('translate-y-20');
+            setTimeout(() => {
+                els.errorToast.classList.add('translate-y-20');
+            }, 5000);
         }
     </script>
 </body>
