@@ -57,7 +57,7 @@
                     <span class="w-2 h-2 rounded-full bg-yellow-400" id="statusDot"></span>
                     <span id="statusText">ກຳລັງກວດສອບ API</span>
                 </div>
-                <span class="text-xs opacity-75">Gemini 1.5 Flash</span>
+                <span class="text-xs opacity-75">Gemini 1.5 Flash (Latest)</span>
             </div>
         </div>
     </header>
@@ -65,13 +65,11 @@
     <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- Sidebar Controls -->
         <div class="lg:col-span-4 space-y-4">
-            <!-- API Key Configuration Section -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                 <div class="flex justify-between items-center mb-2">
                     <label class="block text-sm font-semibold text-gray-700">ຕັ້ງຄ່າ API Key</label>
                     <div class="flex gap-2">
                         <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                             ເອົາ Key ຢູ່ AI Studio
                         </a>
                         <button id="toggleApiBtn" class="text-xs text-indigo-600 hover:underline">ແກ້ໄຂ</button>
@@ -79,12 +77,7 @@
                 </div>
                 
                 <div id="apiInputGroup" class="space-y-2 hidden">
-                    <input type="password" id="apiKeyInput" class="w-full p-2 border border-gray-300 rounded-lg text-xs" placeholder="ວາງ API Key (AI Studio) ຂອງທ່ານທີ່ນີ້"/>
-                    <p class="text-[10px] text-gray-500 leading-relaxed">
-                        1. ເຂົ້າໄປທີ່ <a href="https://aistudio.google.com/" target="_blank" class="underline">Google AI Studio</a><br>
-                        2. ກົດປຸ່ມ <b>"Get API key"</b> ຢູ່ດ້ານຊ້າຍ<br>
-                        3. ຄັດລອກ Key ແລ້ວມາວາງໃສ່ບ່ອນນີ້
-                    </p>
+                    <input type="password" id="apiKeyInput" class="w-full p-2 border border-gray-300 rounded-lg text-xs" placeholder="ວາງ API Key ຂອງທ່ານທີ່ນີ້"/>
                 </div>
                 
                 <div id="apiInfoDisplay" class="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-100 flex items-center gap-2">
@@ -107,8 +100,8 @@
             </div>
 
             <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">3. ຄຳແນະນຳເພີ່ມເຕີມ (Option)</label>
-                <textarea id="promptExtra" rows="3" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="ຕົວຢ່າງ: ແປແບບເປັນທາງການ, ໃຊ້ຄຳສັບທາງການແພດ..."></textarea>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">3. ຄຳແນະນຳເພີ່ມເຕີມ</label>
+                <textarea id="promptExtra" rows="3" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="ຕົວຢ່າງ: ແປແບບເປັນທາງການ..."></textarea>
             </div>
 
             <button id="translateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-md disabled:bg-gray-400">
@@ -117,7 +110,6 @@
 
             <div id="downloadArea" class="hidden">
                 <button id="downloadBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     ດາວໂຫຼດໄຟລ໌ (.doc)
                 </button>
             </div>
@@ -127,30 +119,27 @@
         <div class="lg:col-span-8 space-y-4">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 uppercase border-b">ຕົ້ນສະບັບ</div>
-                <div id="originalPreview" class="p-6 h-[300px] overflow-y-auto doc-preview text-sm text-gray-400 italic text-center flex items-center justify-center">
+                <div id="originalPreview" class="p-6 h-[300px] overflow-y-auto doc-preview text-sm flex items-center justify-center italic text-gray-400">
                     ຍັງບໍ່ມີການອັບໂຫຼດໄຟລ໌
                 </div>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-600 uppercase border-b">ຜົນການແປ</div>
-                <div id="translatedPreview" class="p-6 h-[400px] overflow-y-auto doc-preview text-sm">
-                    <div class="text-gray-400 italic text-center h-full flex items-center justify-center">ຜົນການແປຈະສະແດງຢູ່ບ່ອນນີ້</div>
+                <div id="translatedPreview" class="p-6 h-[400px] overflow-y-auto doc-preview text-sm flex items-center justify-center italic text-gray-400">
+                    ຜົນການແປຈະສະແດງຢູ່ບ່ອນນີ້
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Error Toast -->
-    <div id="errorToast" class="fixed bottom-5 right-5 bg-red-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-y-20 transition-transform duration-300 flex items-center gap-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+    <div id="errorToast" class="fixed bottom-5 right-5 bg-red-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-y-24 transition-transform duration-300">
         <span id="errorMsg"></span>
     </div>
 
     <script>
-        const apiKeyEnv = ""; // Global API Key placeholder
+        const apiKeyEnv = ""; 
         let customApiKey = localStorage.getItem('user_gemini_key') || ""; 
-        
         let sourceHtml = "";
         let translatedHtml = "";
 
@@ -176,7 +165,6 @@
         if (customApiKey) {
             els.apiKeyInput.value = customApiKey;
             els.apiInfoDisplay.innerText = "ໃຊ້ Custom API Key";
-            els.apiInfoDisplay.classList.replace('text-green-600', 'text-blue-600');
         }
 
         els.toggleApiBtn.onclick = () => {
@@ -190,175 +178,102 @@
                 els.apiInputGroup.classList.add('hidden');
                 els.apiInfoDisplay.classList.remove('hidden');
                 els.toggleApiBtn.innerText = "ແກ້ໄຂ";
-                
-                if (customApiKey) {
-                    els.apiInfoDisplay.innerText = "ໃຊ້ Custom API Key";
-                    els.apiInfoDisplay.classList.replace('text-green-600', 'text-blue-600');
-                    updateApiStatus('active', 'ໃຊ້ Custom Key');
-                } else {
-                    els.apiInfoDisplay.innerText = "ພ້ອມໃຊ້ງານ";
-                    els.apiInfoDisplay.classList.replace('text-blue-600', 'text-green-600');
-                    checkInitialApi();
-                }
+                checkApiStatus();
             }
         };
 
-        function updateApiStatus(status, text) {
-            els.statusText.innerText = text;
-            if (status === 'active') {
+        function checkApiStatus() {
+            if (customApiKey || apiKeyEnv) {
                 els.statusDot.className = "w-2 h-2 rounded-full bg-green-400";
-            } else if (status === 'error') {
-                els.statusDot.className = "w-2 h-2 rounded-full bg-red-500 animate-pulse";
+                els.statusText.innerText = "API ພ້ອມແລ້ວ";
             } else {
                 els.statusDot.className = "w-2 h-2 rounded-full bg-yellow-400";
+                els.statusText.innerText = "ກະລຸນາໃສ່ API Key";
             }
         }
-
-        async function checkInitialApi() {
-            if (customApiKey || apiKeyEnv || typeof __app_id !== 'undefined') {
-                updateApiStatus('active', 'API ພ້ອມແລ້ວ');
-            } else {
-                updateApiStatus('pending', 'ກະລຸນາຕັ້ງຄ່າ API Key');
-            }
-        }
-
-        checkInitialApi();
-
-        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
-            const keyToUse = customApiKey || apiKeyEnv || "";
-            const finalUrl = `${url}?key=${keyToUse}`;
-
-            try {
-                const response = await fetch(finalUrl, options);
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorCode = response.status;
-                    const errorMsg = errorData.error?.message || "ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່";
-
-                    if ([401, 403, 404, 429].includes(errorCode)) {
-                        updateApiStatus('error', `Error ${errorCode}`);
-                    }
-                    
-                    if (retries > 0 && errorCode === 429) {
-                        await new Promise(resolve => setTimeout(resolve, backoff));
-                        return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
-                    }
-                    throw new Error(errorMsg);
-                }
-                updateApiStatus('active', 'ກຳລັງປະມວນຜົນ');
-                return await response.json();
-            } catch (err) {
-                if (err.name === 'TypeError' && retries > 0) {
-                    await new Promise(resolve => setTimeout(resolve, backoff));
-                    return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
-                }
-                throw err;
-            }
-        }
+        checkApiStatus();
 
         els.fileInput.onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = async (event) => {
                 try {
-                    const arrayBuffer = event.target.result;
-                    const result = await mammoth.convertToHtml({ arrayBuffer });
+                    const result = await mammoth.convertToHtml({ arrayBuffer: event.target.result });
                     sourceHtml = result.value;
                     els.originalPreview.innerHTML = sourceHtml;
-                    els.originalPreview.classList.remove('text-center', 'items-center', 'italic');
+                    els.originalPreview.classList.remove('italic', 'text-gray-400', 'items-center', 'justify-center');
                 } catch (err) {
-                    showToast("ບໍ່ສາມາດອ່ານໄຟລ໌ Word ໄດ້: " + err.message);
+                    showToast("ອ່ານໄຟລ໌ບໍ່ໄດ້");
                 }
             };
             reader.readAsArrayBuffer(file);
         };
 
         els.translateBtn.onclick = async () => {
-            if (!sourceHtml) return showToast("ກະລຸນາເລືອກໄຟລ໌ກ່ອນ");
-            if (!customApiKey && !apiKeyEnv) return showToast("ກະລຸນາຕັ້ງຄ່າ API Key ກ່ອນເລີ່ມການແປ");
+            if (!sourceHtml) return showToast("ເລືອກໄຟລ໌ກ່ອນ");
+            const key = customApiKey || apiKeyEnv;
+            if (!key) return showToast("ກະລຸນາວາງ API Key ຂອງທ່ານກ່ອນ");
 
             els.translateBtn.disabled = true;
             els.translateBtn.innerText = "ກຳລັງແປ...";
-            els.translatedPreview.innerHTML = `
-                <div class="space-y-4 p-4">
-                    <div class="h-4 bg-gray-200 rounded w-3/4 loading-shimmer"></div>
-                    <div class="h-4 bg-gray-200 rounded w-1/2 loading-shimmer"></div>
-                    <div class="h-4 bg-gray-200 rounded w-5/6 loading-shimmer"></div>
-                    <p class="text-xs text-indigo-500 animate-pulse text-center">AI ກຳລັງວິເຄາະ ແລະ ແປເນື້ອຫາ...</p>
-                </div>`;
+            els.translatedPreview.innerHTML = `<div class="loading-shimmer h-8 w-full mb-4 rounded"></div><div class="loading-shimmer h-24 w-full rounded"></div>`;
 
             const direction = els.langDirection.value;
-            const srcLang = direction === 'lo2en' ? 'Lao' : 'English';
-            const tgtLang = direction === 'lo2en' ? 'English' : 'Lao';
-            
-            const systemPrompt = `You are a professional ${srcLang} to ${tgtLang} translator. 
-            Translate the HTML content provided. Keep all HTML tags intact. 
-            Only translate the text nodes. Do not add any explanation or markdown code blocks. 
-            Keep the output as pure HTML content. 
-            ${els.promptExtra.value ? "Additional Instructions: " + els.promptExtra.value : ""}`;
+            const target = direction === 'lo2en' ? 'English' : 'Lao';
+            const systemPrompt = `Translate this HTML to ${target}. Keep all HTML structure exactly the same. Only translate text inside tags. No preamble, no markdown code blocks. Result must be pure HTML. ${els.promptExtra.value}`;
 
-            // Updated to a more stable model name: gemini-1.5-flash
-            const baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
-            
-            try {
-                const data = await fetchWithRetry(baseUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: sourceHtml }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
+            // Try different model endpoints in order of stability
+            const models = ['gemini-1.5-flash-latest', 'gemini-1.5-flash', 'gemini-1.5-pro-latest'];
+            let lastError = "";
 
-                if (!data.candidates || data.candidates.length === 0) {
-                    throw new Error("AI ບໍ່ສາມາດສ້າງຄຳຕອບໄດ້ໃນຂະນະນີ້.");
+            for (const model of models) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: sourceHtml }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error?.message || "Error");
+
+                    let result = data.candidates[0].content.parts[0].text;
+                    translatedHtml = result.replace(/```html|```/gi, '').trim();
+                    els.translatedPreview.innerHTML = translatedHtml;
+                    els.translatedPreview.classList.remove('italic', 'text-gray-400', 'items-center', 'justify-center');
+                    els.downloadArea.classList.remove('hidden');
+                    els.translateBtn.disabled = false;
+                    els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
+                    return; // Success
+                } catch (err) {
+                    lastError = err.message;
+                    console.log(`Model ${model} failed, trying next...`);
                 }
-
-                let resultText = data.candidates[0].content.parts[0].text;
-                // Clean up any potential markdown block indicators
-                resultText = resultText.replace(/```html/gi, '').replace(/```/g, '').trim();
-                
-                translatedHtml = resultText;
-                els.translatedPreview.innerHTML = translatedHtml;
-                els.downloadArea.classList.remove('hidden');
-                updateApiStatus('active', 'ແປສຳເລັດແລ້ວ');
-            } catch (err) {
-                console.error(err);
-                showToast("ເກີດຂໍ້ຜິດພາດ: " + err.message);
-                els.translatedPreview.innerHTML = `<div class="text-red-500 italic p-4 border border-red-100 rounded-lg bg-red-50">
-                    <strong>ເກີດຂໍ້ຜິດພາດໃນການເຊື່ອມຕໍ່:</strong><br>
-                    ${err.message}<br><br>
-                    <small>ຄຳແນະນຳ: ປ່ຽນໄປໃຊ້ Model gemini-1.5-flash ເພື່ອຄວາມສະຖຽນ.</small>
-                </div>`;
-                updateApiStatus('error', 'ການເຊື່ອມຕໍ່ລົ້ມເຫຼວ');
-            } finally {
-                els.translateBtn.disabled = false;
-                els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
             }
+
+            showToast("ແປບໍ່ໄດ້: " + lastError);
+            els.translatedPreview.innerHTML = `<div class="text-red-500">ເກີດຂໍ້ຜິດພາດ: ${lastError}</div>`;
+            els.translateBtn.disabled = false;
+            els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
         };
 
         els.downloadBtn.onclick = () => {
-            const blob = new Blob(['\ufeff', `<html><head><meta charset="utf-8"><style>body{font-family:'Noto Sans Lao', sans-serif;}</style></head><body>${translatedHtml}</body></html>`], {
-                type: 'application/msword'
-            });
+            const blob = new Blob(['\ufeff', `<html><body>${translatedHtml}</body></html>`], { type: 'application/msword' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `translated_${new Date().getTime()}.doc`;
-            document.body.appendChild(a);
+            a.href = url; a.download = 'translated_doc.doc';
             a.click();
-            document.body.removeChild(a);
         };
 
         function showToast(msg) {
             els.errorMsg.innerText = msg;
-            els.errorToast.classList.remove('translate-y-20');
-            setTimeout(() => {
-                els.errorToast.classList.add('translate-y-20');
-            }, 6000);
+            els.errorToast.classList.remove('translate-y-24');
+            setTimeout(() => els.errorToast.classList.add('translate-y-24'), 5000);
         }
     </script>
 </body>
