@@ -3,289 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ລະບົບແປເອກະສານ Word ລາວ ⇄ ອັງກິດ</title>
+    <title>Lao to English Document Translator</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['"Noto Sans Lao"', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
-        .doc-preview {
-            background: white;
-            color: black;
+        body {
             font-family: 'Noto Sans Lao', sans-serif;
-            line-height: 1.6;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        .doc-preview table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-        .doc-preview th, .doc-preview td { border: 1px solid #ddd; padding: 8px; }
-        .loading-shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
+        h1, h2 {
+            text-align: center;
+            color: #1a73e8;
         }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        input[type="file"] {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        button:disabled {
+            background-color: #a0c1f2;
+            cursor: not-allowed;
+        }
+        .preview-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        @media (min-width: 768px) {
+            .preview-area {
+                flex-direction: row;
+            }
+        }
+        .preview-box {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background: #fafafa;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+            font-weight: bold;
+        }
+        #loading {
+            display: none;
+            color: #d93025;
+            font-weight: bold;
+            margin-top: 10px;
+            align-items: center;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #d93025;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Message Box */
+        #messageBox {
+            display: none;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .msg-error { background-color: #fce8e6; color: #d93025; border: 1px solid #f6c2be; }
+        .msg-success { background-color: #e6f4ea; color: #1e8e3e; border: 1px solid #ceead6; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans">
+<body>
 
-    <header class="bg-indigo-700 text-white p-4 shadow-lg">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
-                AI Document Translator
-            </h1>
-            <div class="flex items-center gap-4">
-                <div id="apiStatus" class="flex items-center gap-1 text-xs bg-indigo-800 px-2 py-1 rounded">
-                    <span class="w-2 h-2 rounded-full bg-yellow-400" id="statusDot"></span>
-                    <span id="statusText">ກຳລັງກວດສອບ API</span>
-                </div>
-                <span class="text-xs opacity-75">Optimized for Gemini 1.5 Flash</span>
+    <h1>ລະບົບແປພາສາເອກະສານ Word (Lao to English)</h1>
+
+    <div id="messageBox"></div>
+
+    <div class="container" style="display: none;">
+        <h2>ຕັ້ງຄ່າການແປ (Settings)</h2>
+        <div class="form-group">
+            <label for="customPrompt">ຄຳສັ່ງພິເສດສຳລັບການແປ (Prompt / Glossary):</label>
+            <textarea id="customPrompt">ກະລຸນາແປເອກະສານ HTML ນີ້ຈາກພາສາລາວເປັນພາສາອັງກິດ. 
+ຕ້ອງຮັກສາ HTML tags (ເຊັ່ນ: <b>, <i>, <h1>, <p>, <table>) ແລະ ໂຄງສ້າງເດີມໄວ້ໃຫ້ຄືເກົ່າທຸກຢ່າງ. 
+ແປແຕ່ສະເພາະຂໍ້ຄວາມທີ່ຢູ່ທາງໃນ tags ເທົ່ານັ້ນ. 
+ໃຊ້ຄຳສັບທາງການ. ຖ້າມີຄຳວ່າ "ສູນສຸຂະພາບ ແມ່ ແລະ ເດັກ" ໃຫ້ແປວ່າ "Maternal and Child Health Center".</textarea>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>ອັບໂຫຼດເອກະສານ (Import Document)</h2>
+        <div class="form-group">
+            <label for="uploadDoc">ເລືອກໄຟລ໌ Word (.docx):</label>
+            <input type="file" id="uploadDoc" accept=".docx">
+        </div>
+        <button id="translateBtn" onclick="processDocument()">ເລີ່ມຕົ້ນການແປ (Translate)</button>
+        <div id="loading"><span class="spinner"></span> ກຳລັງແປພາສາ, ກະລຸນາລໍຖ້າ... (ອາດໃຊ້ເວລາຈັກໜ່ອຍ)</div>
+    </div>
+
+    <div class="container">
+        <h2>ຜົນໄດ້ຮັບ (Preview)</h2>
+        <div class="preview-area">
+            <div class="preview-box">
+                <b style="color: #5f6368;">ຕົ້ນສະບັບ (Original):</b>
+                <div id="originalHtml" style="margin-top: 10px; font-size: 14px;"></div>
+            </div>
+            <div class="preview-box">
+                <b style="color: #1a73e8;">ຜົນການແປ (Translated):</b>
+                <div id="translatedHtml" style="margin-top: 10px; font-size: 14px;"></div>
             </div>
         </div>
-    </header>
+        <br>
+        <button id="exportBtn" onclick="exportToWord()" disabled>ບັນທຶກເປັນໄຟລ໌ Word (Export .docx)</button>
+    </div>
 
-    <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Sidebar Controls -->
-        <div class="lg:col-span-4 space-y-4">
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                <div class="flex justify-between items-center mb-2">
-                    <label class="block text-sm font-semibold text-gray-700">ຕັ້ງຄ່າ API Key</label>
-                    <div class="flex gap-2">
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-100 hover:bg-indigo-100 transition-colors flex items-center gap-1">
-                            ເອົາ Key ຢູ່ AI Studio
-                        </a>
-                        <button id="toggleApiBtn" class="text-xs text-indigo-600 hover:underline">ແກ້ໄຂ</button>
-                    </div>
-                </div>
-                
-                <div id="apiInputGroup" class="space-y-2 hidden">
-                    <input type="password" id="apiKeyInput" class="w-full p-2 border border-gray-300 rounded-lg text-xs" placeholder="ວາງ API Key ຂອງທ່ານທີ່ນີ້"/>
-                </div>
-                
-                <div id="apiInfoDisplay" class="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-100 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04kM12 21.355r2.263-1.41a12.02 12.02 0 003.024-3.024L12 21.355z" /></svg>
-                    ພ້ອມໃຊ້ງານ
-                </div>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">1. ເລືອກໄຟລ໌ Word (.docx)</label>
-                <input type="file" id="fileInput" accept=".docx" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"/>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">2. ທິດທາງການແປ</label>
-                <select id="langDirection" class="w-full p-2 border border-gray-300 rounded-lg text-sm bg-white">
-                    <option value="lo2en">ລາວ ➔ ອັງກິດ (Lao to English)</option>
-                    <option value="en2lo">ອັງກິດ ➔ ລາວ (English to Lao)</option>
-                </select>
-            </div>
-
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">3. ຄຳແນະນຳເພີ່ມເຕີມ</label>
-                <textarea id="promptExtra" rows="3" class="w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="ຕົວຢ່າງ: ແປແບບເປັນທາງການ..."></textarea>
-            </div>
-
-            <button id="translateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-md disabled:bg-gray-400">
-                ເລີ່ມຕົ້ນການແປ
-            </button>
-
-            <div id="downloadArea" class="hidden">
-                <button id="downloadBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex justify-center items-center gap-2">
-                    ດາວໂຫຼດໄຟລ໌ (.doc)
-                </button>
-            </div>
-        </div>
-
-        <!-- Preview Area -->
-        <div class="lg:col-span-8 space-y-4">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-gray-100 px-4 py-2 text-xs font-bold text-gray-500 uppercase border-b">ຕົ້ນສະບັບ</div>
-                <div id="originalPreview" class="p-6 h-[300px] overflow-y-auto doc-preview text-sm flex items-center justify-center italic text-gray-400">
-                    ຍັງບໍ່ມີການອັບໂຫຼດໄຟລ໌
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-600 uppercase border-b">ຜົນການແປ</div>
-                <div id="translatedPreview" class="p-6 h-[400px] overflow-y-auto doc-preview text-sm flex items-center justify-center italic text-gray-400">
-                    ຜົນການແປຈະສະແດງຢູ່ບ່ອນນີ້
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div id="errorToast" class="fixed bottom-5 right-5 bg-red-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-y-24 transition-transform duration-300">
-        <span id="errorMsg"></span>
+    <div class="footer">
+        ສ້າງໂດຍ: Sengdeuan Boutdavong
     </div>
 
     <script>
-        const apiKeyEnv = ""; 
-        let customApiKey = localStorage.getItem('user_gemini_key') || ""; 
-        let sourceHtml = "";
-        let translatedHtml = "";
+        let rawHtml = "";
+        let finalTranslatedHtml = "";
+        const apiKey = ""; // API key is provided automatically by the execution environment
 
-        const els = {
-            fileInput: document.getElementById('fileInput'),
-            translateBtn: document.getElementById('translateBtn'),
-            originalPreview: document.getElementById('originalPreview'),
-            translatedPreview: document.getElementById('translatedPreview'),
-            downloadArea: document.getElementById('downloadArea'),
-            downloadBtn: document.getElementById('downloadBtn'),
-            langDirection: document.getElementById('langDirection'),
-            promptExtra: document.getElementById('promptExtra'),
-            errorToast: document.getElementById('errorToast'),
-            errorMsg: document.getElementById('errorMsg'),
-            apiKeyInput: document.getElementById('apiKeyInput'),
-            toggleApiBtn: document.getElementById('toggleApiBtn'),
-            apiInputGroup: document.getElementById('apiInputGroup'),
-            apiInfoDisplay: document.getElementById('apiInfoDisplay'),
-            statusDot: document.getElementById('statusDot'),
-            statusText: document.getElementById('statusText')
-        };
-
-        if (customApiKey) {
-            els.apiKeyInput.value = customApiKey;
-            els.apiInfoDisplay.innerText = "ໃຊ້ Custom API Key";
-        }
-
-        els.toggleApiBtn.onclick = () => {
-            if (els.apiInputGroup.classList.contains('hidden')) {
-                els.apiInputGroup.classList.remove('hidden');
-                els.apiInfoDisplay.classList.add('hidden');
-                els.toggleApiBtn.innerText = "ບັນທຶກ";
-            } else {
-                customApiKey = els.apiKeyInput.value.trim();
-                localStorage.setItem('user_gemini_key', customApiKey);
-                els.apiInputGroup.classList.add('hidden');
-                els.apiInfoDisplay.classList.remove('hidden');
-                els.toggleApiBtn.innerText = "ແກ້ໄຂ";
-                checkApiStatus();
-            }
-        };
-
-        function checkApiStatus() {
-            if (customApiKey || apiKeyEnv) {
-                els.statusDot.className = "w-2 h-2 rounded-full bg-green-400";
-                els.statusText.innerText = "API ພ້ອມແລ້ວ";
-            } else {
-                els.statusDot.className = "w-2 h-2 rounded-full bg-yellow-400";
-                els.statusText.innerText = "ກະລຸນາໃສ່ API Key";
+        // Function to display messages
+        function showMessage(msg, type) {
+            const msgBox = document.getElementById('messageBox');
+            msgBox.textContent = msg;
+            msgBox.className = type === 'error' ? 'msg-error' : 'msg-success';
+            msgBox.style.display = 'block';
+            
+            // Hide success messages after 5 seconds
+            if(type === 'success') {
+                setTimeout(() => { msgBox.style.display = 'none'; }, 5000);
             }
         }
-        checkApiStatus();
 
-        els.fileInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (event) => {
+        function hideMessage() {
+            document.getElementById('messageBox').style.display = 'none';
+        }
+
+        // ອ່ານໄຟລ໌ .docx ແລະ ປ່ຽນເປັນ HTML
+        document.getElementById('uploadDoc').addEventListener('change', function(event) {
+            hideMessage();
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const arrayBuffer = e.target.result;
+                    mammoth.convertToHtml({arrayBuffer: arrayBuffer})
+                        .then(displayResult)
+                        .catch(handleError);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        });
+
+        function displayResult(result) {
+            rawHtml = result.value;
+            document.getElementById('originalHtml').innerHTML = rawHtml;
+            document.getElementById('translatedHtml').innerHTML = "";
+            document.getElementById('exportBtn').disabled = true;
+        }
+
+        function handleError(err) {
+            showMessage("ເກີດຂໍ້ຜິດພາດໃນການອ່ານໄຟລ໌: " + err, "error");
+        }
+
+        // Retry logic for API calls
+        async function fetchWithRetry(url, options, retries = 5) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
                 try {
-                    const result = await mammoth.convertToHtml({ arrayBuffer: event.target.result });
-                    sourceHtml = result.value;
-                    els.originalPreview.innerHTML = sourceHtml;
-                    els.originalPreview.classList.remove('italic', 'text-gray-400', 'items-center', 'justify-center');
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ຂໍ້ຜິດພາດສະຖານະ: ${response.status}`);
+                    }
+                    return await response.json();
                 } catch (err) {
-                    showToast("ອ່ານໄຟລ໌ບໍ່ໄດ້");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        };
-
-        els.translateBtn.onclick = async () => {
-            if (!sourceHtml) return showToast("ເລືອກໄຟລ໌ກ່ອນ");
-            const key = customApiKey || apiKeyEnv;
-            if (!key) return showToast("ກະລຸນາວາງ API Key ຂອງທ່ານກ່ອນ");
-
-            els.translateBtn.disabled = true;
-            els.translateBtn.innerText = "ກຳລັງແປ...";
-            els.translatedPreview.innerHTML = `<div class="loading-shimmer h-8 w-full mb-4 rounded"></div><div class="loading-shimmer h-24 w-full rounded"></div>`;
-
-            const direction = els.langDirection.value;
-            const target = direction === 'lo2en' ? 'English' : 'Lao';
-            const systemPrompt = `Translate this HTML to ${target}. Keep all HTML structure exactly the same. Only translate text inside tags. No preamble, no markdown code blocks. Result must be pure HTML. ${els.promptExtra.value}`;
-
-            // Try the most compatible endpoints first
-            const configurations = [
-                { version: 'v1beta', model: 'gemini-1.5-flash' },
-                { version: 'v1', model: 'gemini-1.5-flash' },
-                { version: 'v1beta', model: 'gemini-pro' }
-            ];
-
-            let lastError = "";
-
-            for (const config of configurations) {
-                try {
-                    const url = `https://generativelanguage.googleapis.com/${config.version}/models/${config.model}:generateContent?key=${key}`;
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ 
-                                parts: [{ text: `INSTRUCTION: ${systemPrompt}\n\nCONTENT TO TRANSLATE:\n${sourceHtml}` }] 
-                            }]
-                            // Note: Moved systemInstruction into prompt for wider compatibility across versions
-                        })
-                    });
-
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error?.message || "Error");
-
-                    let result = data.candidates[0].content.parts[0].text;
-                    // Clean up potential markdown wrappers
-                    translatedHtml = result.replace(/```html|```/gi, '').trim();
-                    
-                    els.translatedPreview.innerHTML = translatedHtml;
-                    els.translatedPreview.classList.remove('italic', 'text-gray-400', 'items-center', 'justify-center');
-                    els.downloadArea.classList.remove('hidden');
-                    els.translateBtn.disabled = false;
-                    els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
-                    return; 
-                } catch (err) {
-                    lastError = err.message;
-                    console.log(`Failed with ${config.model} (${config.version}): ${err.message}`);
+                    if (i === retries - 1) throw err;
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
                 }
             }
+        }
 
-            showToast("ແປບໍ່ໄດ້: " + lastError);
-            els.translatedPreview.innerHTML = `<div class="text-red-500 p-4 border border-red-200 rounded-lg bg-red-50">
-                <strong>ຂໍ້ຜິດພາດ:</strong> ${lastError}<br><br>
-                <p class="text-xs">ຄຳແນະນຳ: ກະລຸນາກວດສອບວ່າ API Key ຂອງທ່ານມີສະຖານະ Active ໃນ <a href="https://aistudio.google.com/" target="_blank" class="underline">Google AI Studio</a>.</p>
-            </div>`;
-            els.translateBtn.disabled = false;
-            els.translateBtn.innerText = "ເລີ່ມຕົ້ນການແປ";
-        };
+        // ສົ່ງ HTML ໄປໃຫ້ Gemini API ແປ
+        async function processDocument() {
+            hideMessage();
+            const customPrompt = document.getElementById('customPrompt').value.trim();
+            
+            if (!rawHtml) {
+                showMessage("ກະລຸນາອັບໂຫຼດໄຟລ໌ Word ທີ່ຕ້ອງການແປກ່ອນ.", "error");
+                return;
+            }
 
-        els.downloadBtn.onclick = () => {
-            const blob = new Blob(['\ufeff', `<html><head><meta charset="utf-8"></head><body>${translatedHtml}</body></html>`], { type: 'application/msword' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'translated_doc.doc';
-            a.click();
-        };
+            document.getElementById('loading').style.display = "flex";
+            document.getElementById('translateBtn').disabled = true;
 
-        function showToast(msg) {
-            els.errorMsg.innerText = msg;
-            els.errorToast.classList.remove('translate-y-24');
-            setTimeout(() => els.errorToast.classList.add('translate-y-24'), 5000);
+            const fullPrompt = `${customPrompt}\n\nHere is the HTML content to translate:\n\n${rawHtml}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            try {
+                const data = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: fullPrompt }]
+                        }]
+                    })
+                });
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                let translatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if(!translatedText) {
+                    throw new Error("ບໍ່ໄດ້ຮັບຂໍ້ມູນຕອບກັບຈາກ AI");
+                }
+                
+                // ຕັດເຄື່ອງໝາຍ ```html ອອກ
+                translatedText = translatedText.replace(/```html/g, '').replace(/```/g, '').trim();
+
+                finalTranslatedHtml = translatedText;
+                document.getElementById('translatedHtml').innerHTML = finalTranslatedHtml;
+                document.getElementById('exportBtn').disabled = false;
+                
+                showMessage("ການແປພາສາສຳເລັດແລ້ວ! ທ່ານສາມາດກົດບັນທຶກເປັນໄຟລ໌ Word ໄດ້ເລີຍ.", "success");
+
+            } catch (error) {
+                showMessage("ເກີດຂໍ້ຜິດພາດໃນການແປພາສາ: " + error.message, "error");
+            } finally {
+                document.getElementById('loading').style.display = "none";
+                document.getElementById('translateBtn').disabled = false;
+            }
+        }
+
+        // ສ້າງໄຟລ໌ .docx ໃໝ່ຈາກ HTML
+        function exportToWord() {
+            if (!finalTranslatedHtml) {
+                showMessage("ຍັງບໍ່ມີຂໍ້ມູນທີ່ແປແລ້ວ.", "error");
+                return;
+            }
+            
+            // ຫໍ່ຫຸ້ມ HTML ເພື່ອໃຫ້ຮອງຮັບການ export ເປັນ Word ໄດ້ດີຂຶ້ນ
+            const contentForWord = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        body { font-family: 'Times New Roman', Arial, sans-serif; }
+                        h1, h2, h3, h4 { color: #333333; }
+                        p { line-height: 1.5; }
+                    </style>
+                </head>
+                <body>
+                    ${finalTranslatedHtml}
+                </body>
+                </html>
+            `;
+
+            try {
+                const converted = htmlDocx.asBlob(contentForWord);
+                saveAs(converted, "Translated_Document.docx");
+                showMessage("ດາວໂຫຼດໄຟລ໌ສຳເລັດແລ້ວ!", "success");
+            } catch(e) {
+                showMessage("ເກີດຂໍ້ຜິດພາດໃນການສ້າງໄຟລ໌ Word: " + e.message, "error");
+            }
         }
     </script>
 </body>
